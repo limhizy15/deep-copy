@@ -18,15 +18,23 @@ function isSet(value) {
   return value instanceof Set;
 }
 
-function isDeepEqual(obj1, obj2) {
-  const objKeys1 = Object.keys(obj1);
-  const objKeys2 = Object.keys(obj2);
+function isDeepEqual(value, other) {
+  if (value === other) return true
+
+  if ((!isObject(value) && !isObject(other)) || value == null || other == null) {
+    return value === other
+  }
+
+  if (value.constructor !== other.constructor) return false
+
+  const objKeys1 = Object.keys(value);
+  const objKeys2 = Object.keys(other);
 
   if (objKeys1.length !== objKeys2.length) return false;
 
   for (const key of objKeys1) {
-    const value1 = obj1[key];
-    const value2 = obj2[key];
+    const value1 = value[key];
+    const value2 = other[key];
 
     if (isDate(value1) && isDate(value2)) {
       if (value1.getTime() !== value2.getTime()) return false;
