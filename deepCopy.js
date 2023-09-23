@@ -1,52 +1,58 @@
 function isObject(value) {
-  return typeof value === 'object'
+  return typeof value === "object";
 }
 
 export function deepCopy(value) {
-  if (value === null) return null;
-  if (!isObject(value)) return value;
-
-  if (value instanceof Date) {
-    return new Date(value.getTime());
+  if (value === null || !isObject(value)) {
+    return value;
   }
 
-  if (value instanceof RegExp) {
-    return new RegExp(value.source, value.flags);
-  }
+  const constructorOfValue = value.constructor.name;
 
-  if (value instanceof Map) {
-    const clonedMap = new Map();
-    for (let [key, value] of value) {
-      clonedMap.set(deepClone(key), deepClone(value));
+  let copied = constructorOfValue === "Array" ? [] : {};
+
+  switch (constructorOfValue) {
+    case "Array": {
+      value.forEach((v, i) => {
+        copied[i] = deepCopy(v);
+      });
+      break;
     }
-    return clonedMap;
-  }
 
-  if (value instanceof Set) {
-    const clonedSet = new Set();
-    for (let value of value) {
-      clonedSet.add(deepClone(value));
+    case "Date": {
+      copied = new Date(value.getTime());
+      break;
     }
-    return clonedSet;
-  }
 
-  if (value instanceof Array) {
-    const copy = [];
+    case "RegExp": {
+      copied = new RegExp(value.source, value.flags);
+      break;
+    }
 
-    value.forEach((v, i) => {
-      copy[i] = deepCopy(v)
-    })
+    case "Map": {
+      copied = new Map();
+      for (let [key, value] of value) {
+        copied.set(deepCopy(key), deepCopy(value));
+      }
+      break;
+    }
 
-    return copy;
-  }
+    case "Set": {
+      copied = new Set();
+      for (let value of value) {
+        copied.add(deepCopy(value));
+      }
+      break;
+    }
 
-  if (value instanceof Object) {
-    const copy = {};
-    for (let v in value) {
-      if (value.hasOwnProperty(v)) {
-        copy[v] = deepCopy(value[v]);
+    default: {
+      for (let v in value) {
+        if (value.hasOwnProperty(v)) {
+          copied[v] = deepCopy(value[v]);
+        }
       }
     }
-    return copy;
   }
+
+  return copied;
 }
